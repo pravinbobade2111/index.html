@@ -1,0 +1,142 @@
+let products = [];
+let selectedIndex = -1; // Track the selected index for updating
+
+// Check if product data is available in local storage
+if (localStorage.getItem('products')) {
+    products = JSON.parse(localStorage.getItem('products'));
+    displayProductList();
+}
+
+function addProduct() {
+    const productNameInput = document.getElementById("productName");
+    const sellingPriceInput = document.getElementById("sellingPrice");
+
+    const productName = productNameInput.value;
+    const sellingPrice = parseFloat(sellingPriceInput.value);
+
+    if (productName && !isNaN(sellingPrice)) {
+        // Push the product to the local array for display
+        products.push({ productName, sellingPrice });
+
+        // Save the product data in local storage
+        localStorage.setItem('products', JSON.stringify(products));
+
+        // Clear input fields
+        productNameInput.value = "";
+        sellingPriceInput.value = "";
+
+        // Display the product list with the new item
+        displayProductList();
+
+        // Display user input
+        displayUserInput({ productName, sellingPrice });
+
+        // Store the product data in the database using Axios
+        storeProductData({ productName, sellingPrice });
+    }
+}
+
+// Function to display user input
+function displayUserInput(input) {
+    const userInputDiv = document.getElementById("user-input");
+    userInputDiv.innerHTML = `
+        <h2>User Input</h2>
+        <p>Last Added Product:</p>
+        <p>Product Name: ${input.productName}</p>
+        <p>Selling Price: $${input.sellingPrice.toFixed(2)}</p>
+    `;
+}
+
+function updateProduct() {
+    const updateProductNameInput = document.getElementById("updateProductName");
+    const updateSellingPriceInput = document.getElementById("updateSellingPrice");
+
+    const updatedProductName = updateProductNameInput.value;
+    const updatedSellingPrice = parseFloat(updateSellingPriceInput.value);
+
+    if (updatedProductName && !isNaN(updatedSellingPrice) && selectedIndex !== -1) {
+        // Update the product data at the selected index
+        products[selectedIndex] = { productName: updatedProductName, sellingPrice: updatedSellingPrice };
+
+        // Save the updated product data in local storage
+        localStorage.setItem('products', JSON.stringify(products));
+
+        // Clear input fields
+        updateProductNameInput.value = "";
+        updateSellingPriceInput.value = "";
+
+        // Display the updated product list
+        displayProductList();
+
+        // Clear the selected index for updating
+        selectedIndex = -1;
+
+        // Change the button text back to "Update Product"
+        document.querySelector("#update-product-form button").textContent = "Update Product";
+    }
+}
+
+function deleteProduct(index) {
+    if (index >= 0 && index < products.length) {
+        // Remove the product from the list
+        products.splice(index, 1);
+
+        // Save the updated product list to local storage
+        localStorage.setItem('products', JSON.stringify(products));
+
+        // Display the updated product list
+        displayProductList();
+
+        // Delete the product data from the database using Axios
+        deleteProductData(index);
+    }
+}
+
+function editProduct(index) {
+    selectedIndex = index;
+    const product = products[index];
+
+    // Display the selected product details in the update form
+    document.getElementById("updateProductName").value = product.productName;
+    document.getElementById("updateSellingPrice").value = product.sellingPrice;
+
+    // Change the button text to indicate update mode
+    document.querySelector("#update-product-form button").textContent = "Edit";
+}
+
+function displayProductList() {
+    const productList = document.getElementById("product-list");
+    productList.innerHTML = '';
+
+    products.forEach((product, index) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `
+            <span>${product.productName} - $${product.sellingPrice.toFixed(2)}</span>
+            <button class="update-btn" onclick="editProduct(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
+        `;
+        productList.appendChild(listItem);
+    });
+}
+
+// Function to store product data in the database using Axios
+function storeProductData(productData) {
+    axios.post("https://crudcrud.com/api/d2c17aba3c0242eab3edecb294428246/apointmentData", productData)
+        .then((response) => {
+            console.log('Data stored successfully:', response.data);
+        })
+        .catch((error) => {
+            console.error('Error storing data:', error);
+        });
+}
+
+// Function to delete product data from the database using Axios
+function deleteProductData(index) {
+    axios.delete(`https://crudcrud.com/api/d2c17aba3c0242eab3edecb294428246/apointmentData/${index}`)
+        .then((response) => {
+            console.log('Data deleted successfully:', response.data);
+        })
+        .catch((error) => {
+            console.error('Error deleting data:', error);
+        });
+}
