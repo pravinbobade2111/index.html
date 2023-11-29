@@ -1,0 +1,26 @@
+// Function to store user details in local storage
+function storeUserDetails(username, email) {
+  // Retrieve existing user data from local storage
+  var existingUsers = localStorage.getItem('users');
+
+  // Parse existing data (if it's in JSON format) or initialize an empty array
+  var users = existingUsers ? JSON.parse(existingUsers) : [];
+
+  // Add new user details to the array
+  var newUser = {
+    username: username,
+    email: email
+  };
+
+  users.push(newUser);
+
+  // Convert the updated array back to a string
+  var updatedUsers = JSON.stringify(users);
+
+  // Store the updated string in local storage
+  localStorage.setItem('users', updatedUsers);
+}
+
+// Example usage:
+storeUserDetails('JohnDoe', 'john.doe@example.com');
+storeUserDetails('JaneSmith', 'jane.smith@example.com');
