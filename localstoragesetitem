@@ -1,0 +1,48 @@
+<!-- ... Existing HTML code ... -->
+
+<form id="userForm" class="form-inline mb-3">
+  <input type="text" class="form-control mr-2" id="username" placeholder="Username">
+  <input type="email" class="form-control mr-2" id="email" placeholder="Email">
+  <input type="submit" class="btn btn-primary" value="Submit">
+</form>
+
+<script>
+  var userForm = document.getElementById('userForm');
+
+  // Form submit event for user details
+  userForm.addEventListener('submit', storeUserDetails);
+
+  function storeUserDetails(e) {
+    e.preventDefault();
+
+    // Get input values
+    var username = document.getElementById('username').value;
+    var email = document.getElementById('email').value;
+
+    // Get existing user details from local storage
+    var existingUsers = localStorage.getItem('users');
+
+    // Parse existing data (if it's in JSON format)
+    var users = existingUsers ? JSON.parse(existingUsers) : [];
+
+    // Add new user details
+    var newUser = {
+      username: username,
+      email: email
+    };
+
+    users.push(newUser);
+
+    // Convert the combined data back to a string
+    var updatedUsers = JSON.stringify(users);
+
+    // Store the updated string in local storage
+    localStorage.setItem('users', updatedUsers);
+
+    // Optionally, you can clear the form after submission
+    userForm.reset();
+
+    // Optionally, you can provide feedback to the user
+    alert('User details stored in local storage!');
+  }
+</script>
